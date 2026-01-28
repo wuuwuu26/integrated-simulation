@@ -10,6 +10,14 @@ PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Variables for tracking and landing states
+TRACKING_TOPIC="/tracking"
+LANDING_TOPIC="/landing"
+
+# Global variables to track state
+TRACKING_ENABLED=0
+LANDING_ENABLED=0
+
 # Check if roscore is running
 check_ros() {
     if ! rostopic list > /dev/null 2>&1; then
@@ -20,7 +28,41 @@ check_ros() {
     echo -e "${GREEN}✓ ROS core is running${NC}"
 }
 
-# Ask for confirmation
+# Publish tracking state (0 or 1)
+publish_tracking_state() {
+    local state=$1
+    TRACKING_ENABLED=$state
+    
+    echo -e "${CYAN}Publishing $TRACKING_TOPIC=$state...${NC}"
+    rostopic pub -1 $TRACKING_TOPIC std_msgs/Int32 "data: $state"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ $TRACKING_TOPIC=$state published successfully${NC}"
+        return 0
+    else
+        echo -e "${RED}✗ Failed to publish $TRACKING_TOPIC=$state${NC}"
+        return 1
+    fi
+}
+
+# Publish landing state (0 or 1)
+publish_landing_state() {
+    local state=$1
+    LANDING_ENABLED=$state
+    
+    echo -e "${PURPLE}Publishing $LANDING_TOPIC=$state...${NC}"
+    rostopic pub -1 $LANDING_TOPIC std_msgs/Int32 "data: $state"
+    
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓ $LANDING_TOPIC=$state published successfully${NC}"
+        return 0
+    else
+        echo -e "${RED}✗ Failed to publish $LANDING_TOPIC=$state${NC}"
+        return 1
+    fi
+}
+
+# Ask for confirmation with custom message
 ask_confirmation() {
     local prompt=$1
     while true; do
@@ -35,8 +77,11 @@ ask_confirmation() {
 
 # Publish trigger message (single message with -1 flag)
 publish_trigger() {
-    echo -e "${CYAN}Publishing trigger message to /triger...${NC}"
-    rostopic pub -1 /triger geometry_msgs/PoseStamped "header:
+    # Check if tracking is enabled using global variable
+    if [ $TRACKING_ENABLED -eq 1 ]; then
+        echo -e "${GREEN}Tracking is enabled ($TRACKING_TOPIC=1)${NC}"
+        echo -e "${CYAN}Publishing trigger message to /triger...${NC}"
+        rostopic pub -1 /triger geometry_msgs/PoseStamped "header:
   seq: 0
   stamp:
     secs: 0
@@ -52,20 +97,28 @@ pose:
     y: 0.0
     z: 0.0
     w: 0.0"
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ Trigger published successfully${NC}"
-        return 0
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Trigger published successfully${NC}"
+            return 0
+        else
+            echo -e "${RED}✗ Failed to publish trigger${NC}"
+            return 1
+        fi
     else
-        echo -e "${RED}✗ Failed to publish trigger${NC}"
-        return 1
+        echo -e "${YELLOW}Tracking is disabled ($TRACKING_TOPIC=$TRACKING_ENABLED)${NC}"
+        echo -e "${YELLOW}Skipping trigger publication${NC}"
+        return 0
     fi
 }
 
 # Publish land trigger message (single message with -1 flag)
 publish_land_trigger() {
-    echo -e "${PURPLE}Publishing land trigger to /land_triger...${NC}"
-    rostopic pub -1 /land_triger geometry_msgs/PoseStamped "header:
+    # Check if landing is enabled using global variable
+    if [ $LANDING_ENABLED -eq 1 ]; then
+        echo -e "${GREEN}Landing is enabled ($LANDING_TOPIC=1)${NC}"
+        echo -e "${PURPLE}Publishing land trigger to /land_triger...${NC}"
+        rostopic pub -1 /land_triger geometry_msgs/PoseStamped "header:
   seq: 0
   stamp:
     secs: 0
@@ -81,13 +134,18 @@ pose:
     y: 0.0
     z: 0.0
     w: 1.0"
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ Land trigger published successfully${NC}"
-        return 0
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Land trigger published successfully${NC}"
+            return 0
+        else
+            echo -e "${RED}✗ Failed to publish land trigger${NC}"
+            return 1
+        fi
     else
-        echo -e "${RED}✗ Failed to publish land trigger${NC}"
-        return 1
+        echo -e "${YELLOW}Landing is disabled ($LANDING_TOPIC=$LANDING_ENABLED)${NC}"
+        echo -e "${YELLOW}Skipping land trigger publication${NC}"
+        return 0
     fi
 }
 
@@ -95,8 +153,14 @@ pose:
 handle_task_2() {
     echo -e "${YELLOW}Task 2: Elastic-Tracker (one_drone)${NC}"
     if ask_confirmation "Start tracking?"; then
-        publish_trigger
+        # Publish tracking=1
+        if publish_tracking_state 1; then
+            # Now publish the trigger
+            publish_trigger
+        fi
     else
+        # Publish tracking=0 if user says no
+        publish_tracking_state 0
         echo -e "${BLUE}Tracking cancelled for task 2${NC}"
     fi
 }
@@ -105,8 +169,14 @@ handle_task_2() {
 handle_task_3() {
     echo -e "${YELLOW}Task 3: Elastic-Tracker (two_drones)${NC}"
     if ask_confirmation "Start tracking?"; then
-        publish_trigger
+        # Publish tracking=1
+        if publish_tracking_state 1; then
+            # Now publish the trigger
+            publish_trigger
+        fi
     else
+        # Publish tracking=0 if user says no
+        publish_tracking_state 0
         echo -e "${BLUE}Tracking cancelled for task 3${NC}"
     fi
 }
@@ -117,15 +187,27 @@ handle_task_4() {
     
     # First step: tracking
     if ask_confirmation "Start tracking?"; then
-        if publish_trigger; then
-            # Immediately ask about landing after successful trigger publish
-            if ask_confirmation "Start landing?"; then
-                publish_land_trigger
-            else
-                echo -e "${BLUE}Landing cancelled${NC}"
+        # Publish tracking=1
+        if publish_tracking_state 1; then
+            # Now publish the trigger
+            if publish_trigger; then
+                # Ask about landing
+                if ask_confirmation "Start landing?"; then
+                    # Publish landing=1
+                    if publish_landing_state 1; then
+                        # Now publish the land trigger
+                        publish_land_trigger
+                    fi
+                else
+                    # Publish landing=0 if user says no
+                    publish_landing_state 0
+                    echo -e "${BLUE}Landing cancelled${NC}"
+                fi
             fi
         fi
     else
+        # Publish tracking=0 if user says no
+        publish_tracking_state 0
         echo -e "${BLUE}Tracking cancelled for task 4${NC}"
     fi
 }
