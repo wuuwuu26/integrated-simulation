@@ -1,0 +1,56 @@
+<launch>
+  <arg name="init_x" value="0.0"/>
+  <arg name="init_y" value="0.0"/>
+  <arg name="init_z" value="2.0"/> 
+  <arg name="obj_num" value="1" />
+  <arg name="map_size_x_" value="40.0"/>
+  <arg name="map_size_y_" value="40.0"/>
+  <arg name="map_size_z_" value="3.0"/>
+  <arg name="c_num" value="200"/>
+  <arg name="p_num" value="200"/>
+  <arg name="min_dist" value="1.2"/>
+  <arg name="odom_topic" value="/visual_slam/odom" />
+  <arg name="odometry_topic" value="$(arg odom_topic)"/>
+  
+
+  <!-- There are two kinds of maps you can choose, just comment out the one you don't need as shown below. Try it out. -->
+
+  <node pkg="mockamap" type="mockamap_node" name="mockamap_node" output="screen">
+    <remap from="/mock_map" to="/mock_map_original"/>
+
+    <param name="seed" type="int" value="510"/>
+    <param name="update_freq" type="double" value="1.0"/>
+
+    <!-- Box edge length, unit: meter -->
+    <param name="resolution" type="double" value="0.1"/>
+
+    <!-- Map size unit: meter -->
+    <param name="x_length" value="$(arg map_size_x_)"/>
+    <param name="y_length" value="$(arg map_size_y_)"/>
+    <param name="z_length" value="$(arg map_size_z_)"/>
+
+    <!-- Map generation type: 2 = perlin box random map -->
+    <param name="type" type="int" value="2"/>
+    
+    <!-- Ground parameter: 1 = enable ground, 0 = disable ground -->
+    <param name="ground" type="int" value="0"/>
+    
+    <!-- Perlin box random map parameters -->
+    <param name="width_min" type="double" value="0.5"/>
+    <param name="width_max" type="double" value="1.5"/>
+    <param name="height_min" type="double" value="3.5"/>
+    <param name="height_max" type="double" value="4.5"/>
+    <param name="obstacle_number" type="int" value="120"/>
+  </node>
+  
+  <!-- Use relay to copy to first topic -->
+  <node name="relay1" pkg="topic_tools" type="relay"
+        args="/mock_map_original /map_generator/global_cloud"/>
+    
+  <!-- Use relay to copy to second topic -->
+  <node name="relay2" pkg="topic_tools" type="relay"
+        args="/mock_map_original /global_map"/>
+  
+  <include file="$(find ego_planner)/launch/rviz.launch"/> 
+  
+</launch>
