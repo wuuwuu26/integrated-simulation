@@ -154,15 +154,13 @@ if [ $RVIZ_READY -eq 0 ]; then
     echo "Warning: Rviz not detected within $MAX_WAIT seconds, but continuing..."
 fi
 
-sleep 2
-
 echo "map_generator.launch successfully started"
 echo "Now starting to get task_id message..."
 
 # Attempt multiple times to get task_id
 echo "Attempting to get task_id message..."
 task_id=""
-MAX_RETRIES=10
+MAX_RETRIES=8
 RETRY_COUNT=0
 
 while [ -z "$task_id" ] && [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
@@ -200,7 +198,6 @@ fi
 case "$task_id" in
     1)
         echo "task_id=1, starting run_in_sim.launch..."
-        cd ego-planner
         # Use process group
         setsid roslaunch ego_planner run_in_sim.launch &
         SIM_PID=$!
