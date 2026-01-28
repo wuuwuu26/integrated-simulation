@@ -3,7 +3,7 @@ This project combines three previous projects from ZJU-FAST-Lab: ego-planner, El
 # 2. Standard Compilation
 **System used to test**: Ubuntu 20.04 with ros-noetic  
 
-**[NOTE!]** Remember to change the CUDA option of src/uav_simulator/local_sensing/CMakeLists.txt in both ego-planner and Elastic-Tracker packages.
+**[NOTE!]** Remember to change the CUDA option of `src/uav_simulator/local_sensing/CMakeLists.txt` in both ego-planner and Elastic-Tracker packages.
 > Clone the code from github
 ```
 git clone https://github.com/wuuwuu26/Integrated-Simulation.git
