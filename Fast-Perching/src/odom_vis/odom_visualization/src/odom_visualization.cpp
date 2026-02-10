@@ -515,10 +515,10 @@ int main(int argc, char** argv) {
   // n.param("mesh_resource", mesh_resource, std::string("package://odom_visualization/meshes/hummingbird.mesh"));
   n.param("mesh_resource", mesh_resource, std::string("package://odom_visualization/meshes/f250.dae"));
 
-  n.param("color/r", color_r, 1.0);
+  n.param("color/r", color_r, 0.0);
   n.param("color/g", color_g, 0.0);
   n.param("color/b", color_b, 0.0);
-  n.param("color/a", color_a, 1.0);
+  n.param("color/a", color_a, 0.0);
   n.param("origin", origin, false);
   n.param("robot_scale", scale, 2.0);
   n.param("frame_id", _frame_id, string("world"));

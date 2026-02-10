@@ -1,0 +1,13 @@
+file(REMOVE_RECURSE
+  "/home/dwyane/桌面/integrated-simulation/ego-planner/devel/lib/python3/dist-packages/decomp_ros_msgs/msg/_Ellipsoid.py"
+  "/home/dwyane/桌面/integrated-simulation/ego-planner/devel/lib/python3/dist-packages/decomp_ros_msgs/msg/_EllipsoidArray.py"
+  "/home/dwyane/桌面/integrated-simulation/ego-planner/devel/lib/python3/dist-packages/decomp_ros_msgs/msg/_Polyhedron.py"
+  "/home/dwyane/桌面/integrated-simulation/ego-planner/devel/lib/python3/dist-packages/decomp_ros_msgs/msg/_PolyhedronArray.py"
+  "/home/dwyane/桌面/integrated-simulation/ego-planner/devel/lib/python3/dist-packages/decomp_ros_msgs/msg/__init__.py"
+  "CMakeFiles/decomp_ros_msgs_generate_messages_py"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang )
+  include(CMakeFiles/decomp_ros_msgs_generate_messages_py.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

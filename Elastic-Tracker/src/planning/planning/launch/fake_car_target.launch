@@ -1,4 +1,7 @@
 <launch>
+  <arg name="init_x" default="2.0" />
+  <arg name="init_y" default="0.0" />
+
   <group ns="target">
 
     <node pkg="nodelet" type="nodelet" name="manager" args="manager" output="screen">
@@ -6,8 +9,8 @@
     </node>
     <node pkg="nodelet" type="nodelet" name="so3_quadrotor" args="load so3_quadrotor/Nodelet manager" output="screen">
       <rosparam file="$(find uav_simulator)/config/so3_quadrotor.yaml"/>
-      <param name="init_x" value="2" />
-      <param name="init_y" value="0" />
+      <param name="init_x" value="$(arg init_x)" />
+      <param name="init_y" value="$(arg init_y)" />
       <param name="init_z" value="0.8" />
       <remap from="~odom" to="odom"/>
       <remap from="~imu" to="imu" />

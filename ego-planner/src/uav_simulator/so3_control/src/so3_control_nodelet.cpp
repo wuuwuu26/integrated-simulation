@@ -194,7 +194,7 @@ SO3ControlNodelet::onInit(void)
   frame_id_ = "/" + quadrotor_name;
 
   double mass;
-  n.param("mass", mass, 0.5);
+  n.param("mass", mass, 0.98);
   controller_.setMass(mass);
 
   n.param("use_external_yaw", use_external_yaw_, true);
@@ -218,7 +218,7 @@ SO3ControlNodelet::onInit(void)
 
   n.param("so3_control/init_state_x", init_x_, 0.0);
   n.param("so3_control/init_state_y", init_y_, 0.0);
-  n.param("so3_control/init_state_z", init_z_, -10000.0);
+  n.param("so3_control/init_state_z", init_z_, 2.0);
 
   so3_command_pub_ = n.advertise<quadrotor_msgs::SO3Command>("so3_cmd", 10);
 

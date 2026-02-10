@@ -1,5 +1,9 @@
 <launch>
-  <group ns="drone0">
+    <arg name="init_x" default="0.0"/>
+    <arg name="init_y" default="0.0"/>
+    <arg name="init_z" default="2.0"/> 
+  
+    <arg name="init_yaw" default="0.0"/>
 
     <node pkg="odom_visualization" name="odom_visualization" type="odom_visualization" output="screen">
       <remap from="~odom" to="odom" />
@@ -49,14 +53,21 @@
       <param name="rhoThrust" value="10000.0"/>
       <param name="rhoOmega" value="100000.0"/>
       <param name="rhoPerchingCollision" value="1000000.0"/>
-
-      <param name="perching_px" value="0.5"/>
+      
+      <param name="init_x_" value="$(arg init_x)" />
+      <param name="init_y_" value="$(arg init_y)" />
+      <param name="init_z_" value="$(arg init_z)" />
+      
+      
+      <param name="init_yaw_" value="$(arg init_yaw)" />
+      
+      <param name="perching_px" value="1.5"/>
       <param name="perching_py" value="0.0"/>
       <!-- <param name="perching_pz" value="1.0"/> -->
       <!-- <param name="perching_pz" value="1.5"/> -->
       <param name="perching_pz" value="2.0"/>
       <param name="perching_vx" value="0.0"/>
-      <param name="perching_vy" value="2.0"/>
+      <param name="perching_vy" value="1.0"/>
       <param name="perching_vz" value="0.0"/>
 
       <param name="perching_axis_x" value="0.0"/>
@@ -73,5 +84,5 @@
 
     </node>
 
-  </group>
+  
 </launch>

@@ -4,9 +4,12 @@
   <arg name="map_size_y" value="40.0"/>
   <arg name="map_size_z" value=" 3.0"/>
   
-  <arg name="init_x" value="0.0"/>
-  <arg name="init_y" value="0.0"/>
-  <arg name="init_z" value="2.0"/> 
+  <arg name="init_x" default="0.0"/>
+  <arg name="init_y" default="0.0"/>
+  <arg name="init_z" default="2.0"/> 
+  
+  <arg name="init_yaw" default="0.0"/> 
+  
   <arg name="obj_num" value="1" />
   <arg name="map_size_x_" value="$(arg map_size_x)"/>
   <arg name="map_size_y_" value="$(arg map_size_y)"/>
@@ -101,6 +104,7 @@
         <param name="simulator/init_state_x" value="$(arg init_x)"/>
         <param name="simulator/init_state_y" value="$(arg init_y)"/>
         <param name="simulator/init_state_z" value="$(arg init_z)"/>
+        <param name="simulator/init_state_yaw" value="$(arg init_yaw)"/>
 
         <remap from="~odom" to="/visual_slam/odom"/>
         <remap from="~cmd" to="so3_cmd"/>
@@ -135,11 +139,7 @@
   </node--> 
  
   <node pkg="odom_visualization" name="odom_visualization" type="odom_visualization" output="screen">
-        <remap from="~odom" to="/visual_slam/odom"/>
-        <param name="color/a" value="1.0"/>    
-        <param name="color/r" value="0.0"/>        
-        <param name="color/g" value="0.0"/>        
-        <param name="color/b" value="0.0"/>       
+        <remap from="~odom" to="/visual_slam/odom"/>     
         <param name="covariance_scale" value="100.0"/>       
         <param name="robot_scale" value="1.0"/>
         <param name="tf45" value="true"/>

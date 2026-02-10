@@ -33,9 +33,12 @@ class Nodelet : public nodelet::Nodelet {
   bool once_ = false;
   bool debug_replan_ = false;
 
+  Eigen::Vector3d init_p_;
   double tracking_dur_, tracking_dist_, tolerance_d_;
   Eigen::Vector3d perching_p_, perching_v_, perching_axis_;
   double perching_theta_;
+  double init_yaw_;
+  
 
   Trajectory traj_poly_;
   ros::Time replan_stamp_;
@@ -45,7 +48,7 @@ class Nodelet : public nodelet::Nodelet {
 
   int plan_hz_ = 10;
 
-  std::atomic_bool triger_received_ = ATOMIC_VAR_INIT(false);
+  std::atomic_bool triger_received_ = ATOMIC_VAR_INIT(true);
 
   void triger_callback(const geometry_msgs::PoseStampedConstPtr& msgPtr) {
     goal_ << msgPtr->pose.position.x, msgPtr->pose.position.y, 1.0;
@@ -53,9 +56,6 @@ class Nodelet : public nodelet::Nodelet {
   }
 
   void debug_timer_callback(const ros::TimerEvent& event) {
-    if (!triger_received_) {
-      return;
-    }
     Eigen::MatrixXd iniState;
     iniState.setZero(3, 4);
     bool generate_new_traj_success = false;
@@ -65,10 +65,11 @@ class Nodelet : public nodelet::Nodelet {
     Eigen::Quaterniond land_q(1, 0, 0, 0);
 
     iniState.setZero();
-    iniState.col(0).x() = 0.0;
-    iniState.col(0).y() = 0.0;
-    iniState.col(0).z() = 2.0;
+    iniState.col(0).x() = init_p_.x();
+    iniState.col(0).y() = init_p_.y();
+    iniState.col(0).z() = init_p_.z();
     iniState.col(1) = perching_v_;
+    
     target_p = perching_p_;
     target_v = perching_v_;
     target_q.x() = 0.0;
@@ -141,6 +142,81 @@ class Nodelet : public nodelet::Nodelet {
     double dt = 0.001;
     Eigen::Quaterniond q_last;
     double max_omega = 0;
+
+    if (!triger_received_) {
+      double t_last = traj.getTotalDuration();
+      ros::Duration(dt).sleep();
+      // drone
+      Eigen::Vector3d p = traj.getPos(t_last);
+      Eigen::Vector3d a = traj.getAcc(t_last);
+      Eigen::Vector3d j = traj.getJer(t_last);
+      Eigen::Vector3d g(0, 0, -9.8);
+      Eigen::Vector3d thrust = a - g;
+
+      // std::cout << p.x() << " , " << p.z() << " , ";
+
+      Eigen::Vector3d zb = thrust.normalized();
+      {
+        // double a = zb.x();
+        // double b = zb.y();
+        // double c = zb.z();
+        Eigen::Vector3d zb_dot = f_DN(thrust) * j;
+        double omega12 = zb_dot.norm();
+        // if (omega12 > 3.1) {
+        //   std::cout << "omega: " << omega12 << "rad/s  t: " << t << std::endl;
+        // }
+        if (omega12 > max_omega) {
+          max_omega = omega12;
+        }
+        // double a_dot = zb_dot.x();
+        // double b_dot = zb_dot.y();
+        // double omega3 = (b * a_dot - a * b_dot) / (1 + c);
+        // std::cout << "jer: " << j.transpose() << std::endl;
+        // std::cout << "omega12: " << zb_dot.norm() << std::endl;
+        // std::cout << "omega3: " << omega3 << std::endl;
+        // std::cout << thrust.x() << " , " << thrust.z() << " , ";
+        // double omega2 = zb_dot.x() - zb.x() * zb_dot.z() / (zb.z() + 1);
+        // std::cout << omega2 << std::endl;
+        // std::cout << zb_dot.norm() << std::endl;
+      }
+
+      Eigen::Quaterniond q;
+      bool no_singlarity = v2q(zb, q);
+      Eigen::MatrixXd R_dot = (q.toRotationMatrix() - q_last.toRotationMatrix()) / dt;
+      Eigen::MatrixXd omega_M = q.toRotationMatrix().transpose() * R_dot;
+      // std::cout << "omega_M: \n" << omega_M << std::endl;
+      Eigen::Vector3d omega_real;
+      omega_real.x() = -omega_M(1, 2);
+      omega_real.y() = omega_M(0, 2);
+      omega_real.z() = -omega_M(0, 1);
+      // std::cout << "omega_real: " << omega_real.transpose() << std::endl;
+      q_last = q;
+      if (no_singlarity) {
+        msg.pose.pose.position.x = p.x();
+        msg.pose.pose.position.y = p.y();
+        msg.pose.pose.position.z = p.z();
+        msg.pose.pose.orientation.w = q.w();
+        msg.pose.pose.orientation.x = q.x();
+        msg.pose.pose.orientation.y = q.y();
+        msg.pose.pose.orientation.z = q.z();
+        msg.header.stamp = ros::Time::now();
+        visPtr_->visualize_traj(traj, "traj");
+        visPtr_->pub_msg(msg, "odom");
+      }
+
+      msg.pose.pose.position.x = p.x();
+      msg.pose.pose.position.y = p.y();
+      msg.pose.pose.position.z = p.z();
+      msg.pose.pose.orientation.w = q.w();
+      msg.pose.pose.orientation.x = q.x();
+      msg.pose.pose.orientation.y = q.y();
+      msg.pose.pose.orientation.z = q.z();
+      msg.header.stamp = ros::Time::now();
+      visPtr_->pub_msg(msg, "odom");
+      return;
+    }
+
+
     for (double t = 0; t <= traj.getTotalDuration(); t += dt) {
       ros::Duration(dt).sleep();
       // drone
@@ -233,6 +309,7 @@ class Nodelet : public nodelet::Nodelet {
         std::cout << "max omega: " << max_omega << std::endl;
       }
     }
+  
     std::cout << "tailV: " << traj.getVel(traj.getTotalDuration()).transpose() << std::endl;
     std::cout << "max thrust: " << traj.getMaxThrust() << std::endl;
     std::cout << "max omega: " << max_omega << std::endl;
@@ -243,6 +320,12 @@ class Nodelet : public nodelet::Nodelet {
   void init(ros::NodeHandle& nh) {
     // set parameters of planning
     nh.getParam("replan", debug_replan_);
+
+    nh.getParam("init_x_", init_p_.x());
+    nh.getParam("init_y_", init_p_.y());
+    nh.getParam("init_z_", init_p_.z());
+
+    nh.getParam("init_yaw_", init_yaw_);
 
     // NOTE once
     nh.getParam("perching_px", perching_p_.x());

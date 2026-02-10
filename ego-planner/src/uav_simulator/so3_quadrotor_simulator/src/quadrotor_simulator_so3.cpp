@@ -203,6 +203,19 @@ main(int argc, char** argv)
 
   ros::NodeHandle n("~");
 
+  QuadrotorSimulator::Quadrotor quad;
+  double                        _init_x, _init_y, _init_z;
+  n.param("simulator/init_state_x", _init_x, 0.0);
+  n.param("simulator/init_state_y", _init_y, 0.0);
+  n.param("simulator/init_state_z", _init_z, 2.0);
+
+  Eigen::Vector3d position = Eigen::Vector3d(_init_x, _init_y, _init_z);
+  quad.setStatePos(position);
+
+  double _init_yaw;  
+  n.param("simulator/init_state_yaw", _init_yaw, 0.0); 
+  
+
   ros::Publisher  odom_pub = n.advertise<nav_msgs::Odometry>("odom", 100);
   ros::Publisher  imu_pub  = n.advertise<sensor_msgs::Imu>("imu", 10);
   ros::Subscriber cmd_sub =
@@ -214,14 +227,7 @@ main(int argc, char** argv)
     n.subscribe("moment_disturbance", 100, &moment_disturbance_callback,
                 ros::TransportHints().tcpNoDelay());
 
-  QuadrotorSimulator::Quadrotor quad;
-  double                        _init_x, _init_y, _init_z;
-  n.param("simulator/init_state_x", _init_x, 0.0);
-  n.param("simulator/init_state_y", _init_y, 0.0);
-  n.param("simulator/init_state_z", _init_z, 1.0);
-
-  Eigen::Vector3d position = Eigen::Vector3d(_init_x, _init_y, _init_z);
-  quad.setStatePos(position);
+  
 
   double simulation_rate;
   n.param("rate/simulation", simulation_rate, 1000.0);
@@ -248,21 +254,16 @@ main(int argc, char** argv)
   sensor_msgs::Imu imu;
   imu.header.frame_id = "/simulator";
 
-  /*
+  Eigen::Quaterniond quat = uav_utils::ypr_to_quaternion(Eigen::Vector3d(_init_yaw, 0, 0));
   command.force[0] = 0;
   command.force[1] = 0;
-  command.force[2] = quad.getMass()*quad.getGravity() + 0.1;
-  command.qx = 0;
-  command.qy = 0;
-  command.qz = 0;
-  command.qw = 1;
-  command.kR[0] = 2;
-  command.kR[1] = 2;
-  command.kR[2] = 2;
-  command.kOm[0] = 0.15;
-  command.kOm[1] = 0.15;
-  command.kOm[2] = 0.15;
-  */
+  command.force[2] = quad.getMass()*quad.getGravity();
+  command.qx = quat.x();
+  command.qy = quat.y();
+  command.qz = quat.z();
+  command.qw = quat.w();
+  
+  
 
   ros::Time next_odom_pub_time = ros::Time::now();
   while (n.ok())

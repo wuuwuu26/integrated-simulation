@@ -215,16 +215,16 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
   meshROS.type = visualization_msgs::Marker::MESH_RESOURCE;
   meshROS.action = visualization_msgs::Marker::ADD;
   meshROS.mesh_use_embedded_materials = true;
-  // meshROS.pose.position.x = msg->pose.pose.position.x;
-  // meshROS.pose.position.y = msg->pose.pose.position.y;
-  // meshROS.pose.position.z = msg->pose.pose.position.z;
-  // q(0) = msg->pose.pose.orientation.w;
-  // q(1) = msg->pose.pose.orientation.x;
-  // q(2) = msg->pose.pose.orientation.y;
-  // q(3) = msg->pose.pose.orientation.z;
-  meshROS.pose.position.x = pose(0);
-  meshROS.pose.position.y = pose(1);
-  meshROS.pose.position.z = pose(2);
+  meshROS.pose.position.x = msg->pose.pose.position.x;
+  meshROS.pose.position.y = msg->pose.pose.position.y;
+  meshROS.pose.position.z = msg->pose.pose.position.z;
+  q(0) = msg->pose.pose.orientation.w;
+  q(1) = msg->pose.pose.orientation.x;
+  q(2) = msg->pose.pose.orientation.y;
+  q(3) = msg->pose.pose.orientation.z;
+  // meshROS.pose.position.x = pose(0);
+  // meshROS.pose.position.y = pose(1);
+  // meshROS.pose.position.z = pose(2);
 
   if (cross_config) {
     colvec ypr = R_to_ypr(quaternion_to_R(q));
@@ -565,7 +565,7 @@ int main(int argc, char** argv) {
   n.param("color/r", color_r, 1.0);
   n.param("color/g", color_g, 0.0);
   n.param("color/b", color_b, 0.0);
-  n.param("color/a", color_a, 1.0);
+  n.param("color/a", color_a, 0.0);
   n.param("origin", origin, false);
   n.param("robot_scale", scale, 2.0);
   n.param("frame_id", _frame_id, string("world"));

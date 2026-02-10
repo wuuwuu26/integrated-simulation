@@ -4,7 +4,7 @@
 #include <ros/ros.h>
 
 SO3Control::SO3Control()
-  : mass_(0.5)
+  : mass_(0.98)
   , g_(9.81)
 {
   acc_.setZero();

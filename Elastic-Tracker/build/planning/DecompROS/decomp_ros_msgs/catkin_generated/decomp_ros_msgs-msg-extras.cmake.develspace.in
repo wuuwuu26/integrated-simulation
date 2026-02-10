@@ -1,0 +1,2 @@
+set(decomp_ros_msgs_MESSAGE_FILES "/home/dwyane/桌面/integrated-simulation/Elastic-Tracker/src/planning/DecompROS/decomp_ros_msgs/msg/Ellipsoid.msg;/home/dwyane/桌面/integrated-simulation/Elastic-Tracker/src/planning/DecompROS/decomp_ros_msgs/msg/EllipsoidArray.msg;/home/dwyane/桌面/integrated-simulation/Elastic-Tracker/src/planning/DecompROS/decomp_ros_msgs/msg/Polyhedron.msg;/home/dwyane/桌面/integrated-simulation/Elastic-Tracker/src/planning/DecompROS/decomp_ros_msgs/msg/PolyhedronArray.msg")
+set(decomp_ros_msgs_SERVICE_FILES "")

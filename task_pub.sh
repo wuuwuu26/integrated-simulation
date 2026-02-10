@@ -1,228 +1,34 @@
 #!/bin/bash
-# task_pub.sh - ROS1 Task Publisher Script (task_id: 1-5)
+# task_pub.sh - Simplified ROS1 Task Publisher Script (only publishes task_id: 1-5)
 
 # Color definitions
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
 NC='\033[0m' # No Color
-
-# Variables for tracking and landing states
-TRACKING_TOPIC="/tracking"
-LANDING_TOPIC="/landing"
-
-# Global variables to track state
-TRACKING_ENABLED=0
-LANDING_ENABLED=0
 
 # Check if roscore is running
 check_ros() {
     if ! rostopic list > /dev/null 2>&1; then
-        echo -e "${RED}Error: roscore is not running!${NC}"
+        echo -e "${RED}Error: roscore not running!${NC}"
         echo "Please run: roscore"
         exit 1
     fi
-    echo -e "${GREEN}✓ ROS core is running${NC}"
+    echo -e "${GREEN}✓ ROS core running normally${NC}"
 }
 
-# Publish tracking state (0 or 1)
-publish_tracking_state() {
-    local state=$1
-    TRACKING_ENABLED=$state
-    
-    echo -e "${CYAN}Publishing $TRACKING_TOPIC=$state...${NC}"
-    rostopic pub -1 $TRACKING_TOPIC std_msgs/Int32 "data: $state"
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ $TRACKING_TOPIC=$state published successfully${NC}"
-        return 0
-    else
-        echo -e "${RED}✗ Failed to publish $TRACKING_TOPIC=$state${NC}"
-        return 1
-    fi
-}
-
-# Publish landing state (0 or 1)
-publish_landing_state() {
-    local state=$1
-    LANDING_ENABLED=$state
-    
-    echo -e "${PURPLE}Publishing $LANDING_TOPIC=$state...${NC}"
-    rostopic pub -1 $LANDING_TOPIC std_msgs/Int32 "data: $state"
-    
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✓ $LANDING_TOPIC=$state published successfully${NC}"
-        return 0
-    else
-        echo -e "${RED}✗ Failed to publish $LANDING_TOPIC=$state${NC}"
-        return 1
-    fi
-}
-
-# Ask for confirmation with custom message
-ask_confirmation() {
-    local prompt=$1
-    while true; do
-        read -p "$prompt [Y/N]: " answer
-        case $answer in
-            [Yy]* ) return 0;;  # Yes
-            [Nn]* ) return 1;;  # No
-            * ) echo -e "${YELLOW}Please answer Y or N.${NC}";;
-        esac
-    done
-}
-
-# Publish trigger message (single message with -1 flag)
-publish_trigger() {
-    # Check if tracking is enabled using global variable
-    if [ $TRACKING_ENABLED -eq 1 ]; then
-        echo -e "${GREEN}Tracking is enabled ($TRACKING_TOPIC=1)${NC}"
-        echo -e "${CYAN}Publishing trigger message to /triger...${NC}"
-        rostopic pub -1 /triger geometry_msgs/PoseStamped "header:
-  seq: 0
-  stamp:
-    secs: 0
-    nsecs: 0
-  frame_id: ''
-pose:
-  position:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  orientation:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 0.0"
-        
-        if [ $? -eq 0 ]; then
-            echo -e "${GREEN}✓ Trigger published successfully${NC}"
-            return 0
-        else
-            echo -e "${RED}✗ Failed to publish trigger${NC}"
-            return 1
-        fi
-    else
-        echo -e "${YELLOW}Tracking is disabled ($TRACKING_TOPIC=$TRACKING_ENABLED)${NC}"
-        echo -e "${YELLOW}Skipping trigger publication${NC}"
-        return 0
-    fi
-}
-
-# Publish land trigger message (single message with -1 flag)
-publish_land_trigger() {
-    # Check if landing is enabled using global variable
-    if [ $LANDING_ENABLED -eq 1 ]; then
-        echo -e "${GREEN}Landing is enabled ($LANDING_TOPIC=1)${NC}"
-        echo -e "${PURPLE}Publishing land trigger to /land_triger...${NC}"
-        rostopic pub -1 /land_triger geometry_msgs/PoseStamped "header:
-  seq: 0
-  stamp:
-    secs: 0
-    nsecs: 0
-  frame_id: ''
-pose:
-  position:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  orientation:
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0"
-        
-        if [ $? -eq 0 ]; then
-            echo -e "${GREEN}✓ Land trigger published successfully${NC}"
-            return 0
-        else
-            echo -e "${RED}✗ Failed to publish land trigger${NC}"
-            return 1
-        fi
-    else
-        echo -e "${YELLOW}Landing is disabled ($LANDING_TOPIC=$LANDING_ENABLED)${NC}"
-        echo -e "${YELLOW}Skipping land trigger publication${NC}"
-        return 0
-    fi
-}
-
-# Handle task_id 2
-handle_task_2() {
-    echo -e "${YELLOW}Task 2: Elastic-Tracker (one_drone)${NC}"
-    if ask_confirmation "Start tracking?"; then
-        # Publish tracking=1
-        if publish_tracking_state 1; then
-            # Now publish the trigger
-            publish_trigger
-        fi
-    else
-        # Publish tracking=0 if user says no
-        publish_tracking_state 0
-        echo -e "${BLUE}Tracking cancelled for task 2${NC}"
-    fi
-}
-
-# Handle task_id 3
-handle_task_3() {
-    echo -e "${YELLOW}Task 3: Elastic-Tracker (two_drones)${NC}"
-    if ask_confirmation "Start tracking?"; then
-        # Publish tracking=1
-        if publish_tracking_state 1; then
-            # Now publish the trigger
-            publish_trigger
-        fi
-    else
-        # Publish tracking=0 if user says no
-        publish_tracking_state 0
-        echo -e "${BLUE}Tracking cancelled for task 3${NC}"
-    fi
-}
-
-# Handle task_id 4
-handle_task_4() {
-    echo -e "${YELLOW}Task 4: Elastic-Tracker (drone+car)${NC}"
-    
-    # First step: tracking
-    if ask_confirmation "Start tracking?"; then
-        # Publish tracking=1
-        if publish_tracking_state 1; then
-            # Now publish the trigger
-            if publish_trigger; then
-                # Ask about landing
-                if ask_confirmation "Start landing?"; then
-                    # Publish landing=1
-                    if publish_landing_state 1; then
-                        # Now publish the land trigger
-                        publish_land_trigger
-                    fi
-                else
-                    # Publish landing=0 if user says no
-                    publish_landing_state 0
-                    echo -e "${BLUE}Landing cancelled${NC}"
-                fi
-            fi
-        fi
-    else
-        # Publish tracking=0 if user says no
-        publish_tracking_state 0
-        echo -e "${BLUE}Tracking cancelled for task 4${NC}"
-    fi
-}
-
-# Publish basic task_id
-publish_basic_task() {
+# Publish task_id
+publish_task() {
     local task_id=$1
     local task_name=""
     
     case $task_id in
-        1) task_name="Ego-Planner";;
-        2) task_name="Elastic-Tracker: one_drone";;
-        3) task_name="Elastic-Tracker: two_drones";;
-        4) task_name="Elastic-Tracker: drone+car";;
-        5) task_name="Fast-Perching";;
+        1) task_name="ego-plan";;
+        2) task_name="track";;
+        3) task_name="track-car";;
+        4) task_name="land";;
+        5) task_name="perch";;
     esac
     
     echo -e "${YELLOW}Publishing task_id=$task_id [$task_name]...${NC}"
@@ -233,7 +39,7 @@ publish_basic_task() {
         echo -e "${GREEN}✓ Successfully published task_id=$task_id${NC}"
         return 0
     else
-        echo -e "${RED}✗ Failed to publish${NC}"
+        echo -e "${RED}✗ Publication failed${NC}"
         return 1
     fi
 }
@@ -245,12 +51,12 @@ show_menu() {
     echo -e "${YELLOW}           ROS Task Publisher${NC}"
     echo -e "${BLUE}==========================================${NC}"
     echo -e "Select task_id to publish:"
-    echo -e "  ${GREEN}1${NC} - Publish task_id=1 ${YELLOW}[Ego-Planner]${NC}"
-    echo -e "  ${GREEN}2${NC} - Publish task_id=2 ${YELLOW}[Elastic-Tracker: one_drone]${NC}"
-    echo -e "  ${GREEN}3${NC} - Publish task_id=3 ${YELLOW}[Elastic-Tracker: two_drones]${NC}"
-    echo -e "  ${GREEN}4${NC} - Publish task_id=4 ${YELLOW}[Elastic-Tracker: drone+car]${NC}"
-    echo -e "  ${GREEN}5${NC} - Publish task_id=5 ${YELLOW}[Fast-Perching]${NC}"
-    echo -e "  ${RED}q${NC} - Quit program"
+    echo -e "  ${GREEN}1${NC} - Publish task_id=1 ${YELLOW}[ego-plan]${NC}"
+    echo -e "  ${GREEN}2${NC} - Publish task_id=2 ${YELLOW}[track]${NC}"
+    echo -e "  ${GREEN}3${NC} - Publish task_id=3 ${YELLOW}[track-car]${NC}"
+    echo -e "  ${GREEN}4${NC} - Publish task_id=4 ${YELLOW}[land]${NC}"
+    echo -e "  ${GREEN}5${NC} - Publish task_id=5 ${YELLOW}[perch]${NC}"
+    echo -e "  ${RED}q${NC} - Exit program"
     echo -e "${BLUE}==========================================${NC}"
 }
 
@@ -267,28 +73,28 @@ main() {
         
         case $choice in
             1)
-                if publish_basic_task 1; then
-                    echo -e "${GREEN}✓ Ego-Planner task initiated${NC}"
+                if publish_task 1; then
+                    echo -e "${GREEN}✓ ego-plan task published${NC}"
                 fi
                 ;;
             2)
-                if publish_basic_task 2; then
-                    handle_task_2
+                if publish_task 2; then
+                    echo -e "${GREEN}✓ track task published${NC}"
                 fi
                 ;;
             3)
-                if publish_basic_task 3; then
-                    handle_task_3
+                if publish_task 3; then
+                    echo -e "${GREEN}✓ track-car task published${NC}"
                 fi
                 ;;
             4)
-                if publish_basic_task 4; then
-                    handle_task_4
+                if publish_task 4; then
+                    echo -e "${GREEN}✓ land task published${NC}"
                 fi
                 ;;
             5)
-                if publish_basic_task 5; then
-                    echo -e "${GREEN}✓ Fast-Perching task initiated${NC}"
+                if publish_task 5; then
+                    echo -e "${GREEN}✓ perch task published${NC}"
                 fi
                 ;;
             q|Q)

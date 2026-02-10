@@ -328,6 +328,7 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
   meshROS.id = 0;
   meshROS.type = visualization_msgs::Marker::MESH_RESOURCE;
   meshROS.action = visualization_msgs::Marker::ADD;
+  meshROS.mesh_use_embedded_materials = true; 
   meshROS.pose.position.x = msg->pose.pose.position.x;
   meshROS.pose.position.y = msg->pose.pose.position.y;
   meshROS.pose.position.z = msg->pose.pose.position.z;
@@ -348,10 +349,10 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& msg)
   meshROS.scale.x = scale;
   meshROS.scale.y = scale;
   meshROS.scale.z = scale;
-  meshROS.color.a = color_a;
-  meshROS.color.r = color_r;
-  meshROS.color.g = color_g;
-  meshROS.color.b = color_b;
+  meshROS.color.a = 0;
+  meshROS.color.r = 0;
+  meshROS.color.g = 0;
+  meshROS.color.b = 0;
   meshROS.mesh_resource = mesh_resource;
   meshPub.publish(meshROS);                                                  
 
@@ -406,6 +407,7 @@ void cmd_callback(const quadrotor_msgs::PositionCommand cmd)
   meshROS.id = 0;
   meshROS.type = visualization_msgs::Marker::MESH_RESOURCE;
   meshROS.action = visualization_msgs::Marker::ADD;
+  
   meshROS.pose.position.x = cmd.position.x;
   meshROS.pose.position.y = cmd.position.y;
   meshROS.pose.position.z = cmd.position.z;
@@ -420,9 +422,9 @@ void cmd_callback(const quadrotor_msgs::PositionCommand cmd)
   meshROS.pose.orientation.x = q(1);
   meshROS.pose.orientation.y = q(2);
   meshROS.pose.orientation.z = q(3);
-  meshROS.scale.x = 2.0;
-  meshROS.scale.y = 2.0;
-  meshROS.scale.z = 2.0;
+  meshROS.scale.x = 1.0;
+  meshROS.scale.y = 1.0;
+  meshROS.scale.z = 1.0;
   meshROS.color.a = color_a;
   meshROS.color.r = color_r;
   meshROS.color.g = color_g;
@@ -436,11 +438,11 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "odom_visualization");
   ros::NodeHandle n("~");
 
-  n.param("mesh_resource", mesh_resource, std::string("package://odom_visualization/meshes/hummingbird.mesh"));
+  n.param("mesh_resource", mesh_resource, std::string("package://odom_visualization/meshes/f250.dae"));
   n.param("color/r", color_r, 1.0);
   n.param("color/g", color_g, 0.0);
   n.param("color/b", color_b, 0.0);
-  n.param("color/a", color_a, 1.0);
+  n.param("color/a", color_a, 0.0);
   n.param("origin", origin, false);  
   n.param("robot_scale", scale, 2.0);    
   n.param("frame_id",   _frame_id, string("world") );    

@@ -1,0 +1,8 @@
+prefix=/home/dwyane/桌面/integrated-simulation/Elastic-Tracker/devel
+
+Name: uav_simulator
+Description: Description of uav_simulator
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

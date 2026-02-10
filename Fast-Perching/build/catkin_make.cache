@@ -1,0 +1,2 @@
+odom_vis/odom_visualization:odom_vis/pose_utils:planning:traj_opt:vis_utils
+-DCATKIN_DEVEL_PREFIX=/home/dwyane/桌面/integrated-simulation/Fast-Perching/devel -DCMAKE_INSTALL_PREFIX=/home/dwyane/桌面/integrated-simulation/Fast-Perching/install -G Unix Makefiles

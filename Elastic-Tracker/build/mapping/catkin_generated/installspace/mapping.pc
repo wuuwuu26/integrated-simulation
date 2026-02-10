@@ -1,0 +1,8 @@
+prefix=/home/dwyane/桌面/integrated-simulation/Elastic-Tracker/install
+
+Name: mapping
+Description: Description of mapping
+Version: 0.0.0
+Cflags: -I${prefix}/include -I/usr/include/eigen3
+Libs: -L${prefix}/lib -lmapping
+Requires: quadrotor_msgs roscpp nodelet tf pcl_ros pcl_conversions
