@@ -1,8 +1,0 @@
-prefix=/home/dwyane/桌面/integrated-simulation/Elastic-Tracker/install
-
-Name: so3_quadrotor
-Description: Description of so3_quadrotor
-Version: 0.0.0
-Cflags: -I${prefix}/include -I/usr/include/eigen3
-Libs: -L${prefix}/lib 
-Requires: quadrotor_msgs roscpp nodelet tf
