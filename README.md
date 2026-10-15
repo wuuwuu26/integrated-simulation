@@ -1,3 +1,9 @@
+<div align="center">
+
+**🌐 English | [简体中文](README_CN.md)**
+
+</div>
+
 # 1. Overview
 This project combines three previous projects from ZJU-FAST-Lab: ego-planner, Elastic-Tracker, Fast-Perching. By running a single bash file, you can run one of these projects in one unified simulation environment.
 # 2. Standard Compilation
