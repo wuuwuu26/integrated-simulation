@@ -7,6 +7,13 @@
 # 1. 项目概述
 本项目整合了 ZJU-FAST-Lab 的三个已有项目：ego-planner、Elastic-Tracker、Fast-Perching。只需运行一个 bash 脚本，即可在一个统一的仿真环境中运行其中任意一个项目。
 
+## 原始项目
+本仓库整合了 [ZJU-FAST-Lab](https://github.com/ZJU-FAST-Lab) 的以下开源项目：
+
+- **[ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner)** — 自主探索与轨迹规划（⭐ 2.7k）
+- **[Elastic-Tracker](https://github.com/ZJU-FAST-Lab/Elastic-Tracker)** — 面向灵活空中跟踪的时空轨迹规划器（⭐ 333）
+- **[Fast-Perching](https://github.com/ZJU-FAST-Lab/Fast-Perching)** — 面向空中栖停的实时轨迹规划（⭐ 124）
+
 # 2. 标准编译
 **测试系统**：Ubuntu 20.04 + ros-noetic
 

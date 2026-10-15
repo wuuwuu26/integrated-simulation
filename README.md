@@ -6,6 +6,14 @@
 
 # 1. Overview
 This project combines three previous projects from ZJU-FAST-Lab: ego-planner, Elastic-Tracker, Fast-Perching. By running a single bash file, you can run one of these projects in one unified simulation environment.
+
+## Previous Projects
+This repository integrates the following open-source projects from [ZJU-FAST-Lab](https://github.com/ZJU-FAST-Lab):
+
+- **[ego-planner](https://github.com/ZJU-FAST-Lab/ego-planner)** — Autonomous exploration & trajectory planning (⭐ 2.7k)
+- **[Elastic-Tracker](https://github.com/ZJU-FAST-Lab/Elastic-Tracker)** — A spatio-temporal trajectory planner for flexible aerial tracking (⭐ 333)
+- **[Fast-Perching](https://github.com/ZJU-FAST-Lab/Fast-Perching)** — Real-time trajectory planning for aerial perching (⭐ 124)
+
 # 2. Standard Compilation
 **System used to test**: Ubuntu 20.04 with ros-noetic  
 
